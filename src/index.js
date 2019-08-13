@@ -1,6 +1,8 @@
 //Import libraries
 import React from 'react';
 import ReactDOM from 'react-dom';
+import SeasonDisplay from './SeasonDisplay';
+import Spinner from './Spinner';
 
 //Class Component
 class App extends React.Component {
@@ -13,38 +15,46 @@ class App extends React.Component {
             lat: null,
             errorMsg: ''
         };
-
-        //Geolocation (callback - success, failure)
-        window.navigator.geolocation.getCurrentPosition(
-            //Call setState to change position
-            (position) => {
-                this.setState({ lat: position.coords.latitude });
-            },
-            (err) => {
-                this.setState({ errorMsg: err.message });
-            }
-        );
     }
+
+    /* Another way to define state (does not require 'this' - automatically creates constructor function)
+    state = { lat: null, errorMessage: '' }; 
+    */
 
     //Component Lifecycle
     componentDidMount() {
-        console.log('Mounted');
+        //Geolocation (callback - success, failure)
+        window.navigator.geolocation.getCurrentPosition(
+            //Call setState to change position
+            (position) => this.setState({ lat: position.coords.latitude }),
+            (err) => this.setState({ errorMsg: err.message })
+        );
     }
 
     componentDidUpdate() {
         console.log('Re-rendered');
     }
 
-    //Render Method (required)
-    render() {
+
+    //Helper function
+    renderContent() {
         //Renders state onto DOM (conditional)
         if (this.state.errorMsg && !this.state.lat) {
-           return  <div>Error: { this.state.errorMsg }</div>;
+            return  <div>Error: { this.state.errorMsg }</div>;
         } else if (!this.state.errorMessage && this.state.lat) {
-            return <div>Lattitude: { this.state.lat } </div>;
+            return <SeasonDisplay lat={this.state.lat} />
         } else {
-            return <div>Loading...</div>;
+            return <Spinner message="Please accept location request" />;
         }
+    }
+
+    //Render Method (required)
+    render() {
+        return (
+            <div className="container">
+                {this.renderContent()}
+            </div>
+        )
     }
 }
 
